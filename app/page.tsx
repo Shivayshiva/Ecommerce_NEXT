@@ -1,65 +1,115 @@
-import Image from "next/image";
+const categories = [
+  {
+    title: "New Arrivals",
+    copy: "Fresh picks across apparel, gadgets, and home essentials.",
+  },
+  {
+    title: "Best Sellers",
+    copy: "Most-loved products with consistent 5-star reviews.",
+  },
+  {
+    title: "Under $50",
+    copy: "Everyday value without compromising on quality.",
+  },
+];
+
+const testimonials = [
+  { quote: "Great quality and quick delivery every time.", name: "Riya" },
+  { quote: "Simple checkout and reliable support.", name: "Arjun" },
+];
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="mx-auto flex max-w-5xl flex-col gap-12 px-6 py-16">
+        <header className="flex flex-col gap-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            Aurora Commerce
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+          <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">
+            Shop the essentials that fit your day-to-day.
+          </h1>
+          <p className="max-w-2xl text-lg text-slate-600">
+            Clean layout, clear prices, and curated picks so you can check out in minutes.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <a
+              href="/shop"
+              className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              Start shopping
+            </a>
+            <a
+              href="/signin"
+              className="rounded-full border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-300"
+            >
+              Sign in
+            </a>
+            <span className="text-sm text-slate-500">Free returns for 30 days</span>
+          </div>
+        </header>
+
+        <section className="grid gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:grid-cols-2">
+          <div className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Featured
+            </p>
+            <h2 className="text-2xl font-semibold">Handpicked for you</h2>
+            <p className="text-sm text-slate-600">
+              Quick links to the most requested categories so you can jump right in.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {categories.map((item) => (
+              <div
+                key={item.title}
+                className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm"
+              >
+                <div className="font-semibold">{item.title}</div>
+                <p className="mt-2 text-slate-600">{item.copy}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:grid-cols-3">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Shipping
+            </p>
+            <h3 className="text-lg font-semibold">Fast & predictable</h3>
+            <p className="text-sm text-slate-600">Most orders arrive within 3–5 days.</p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Support
+            </p>
+            <h3 className="text-lg font-semibold">Always here</h3>
+            <p className="text-sm text-slate-600">
+              Chat or email support to help with sizing, returns, or orders.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Rewards
+            </p>
+            <h3 className="text-lg font-semibold">Earn as you shop</h3>
+            <p className="text-sm text-slate-600">Points on every order with simple perks.</p>
+          </div>
+        </section>
+
+        <section className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:grid-cols-2">
+          {testimonials.map((item) => (
+            <div
+              key={item.name}
+              className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700"
+            >
+              “{item.quote}”
+              <div className="mt-3 text-xs font-semibold text-slate-500">— {item.name}</div>
+            </div>
+          ))}
+        </section>
+      </div>
+    </main>
   );
 }
