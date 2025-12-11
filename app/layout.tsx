@@ -17,7 +17,11 @@ export const metadata: Metadata = {
   title: "Sirsa Ecommerce | Modern storefront",
   description:
     "A modern e-commerce experience with curated collections, effortless checkout, and personalized recommendations.",
+    openGraph: {
+      images: `${process.env.NEXT_PUBLIC_APP_URL}/api/og`, 
+    },
 };
+
 
 export default function RootLayout({
   children,

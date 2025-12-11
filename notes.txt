@@ -1,0 +1,2 @@
+Need to add feature that when user login, then i should detect location and see delivery location on homepage.
+In Search bar, How suggestion is coming , what BE login written on this.

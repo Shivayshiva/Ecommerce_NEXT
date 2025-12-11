@@ -28,18 +28,49 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useCartStore } from "@/lib/store"
 import { MegaMenu } from "./mega-menu"
+import SearchBar from "@/app/(public)/components/searchBar"
+import Cart from "@/app/(public)/components/cart"
+import Wishlist from "@/app/(public)/components/wishlist"
+import Notification from "@/app/(public)/components/notification"
+import Account from "@/app/(public)/components/account"
+import LogoSection from "@/app/(public)/components/logoSection"
+import LocationDetector from "@/app/(public)/components/locationDetector"
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [showMegaMenu, setShowMegaMenu] = useState(false)
   const [searchFocused, setSearchFocused] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [selectedLocation, setSelectedLocation] = useState("New York 10001")
+  const [selectedCategory, setSelectedCategory] = useState("All Categories")
   const { items, toggleCart } = useCartStore()
   const { data: session } = useSession()
 
   const userName = session?.user?.name || session?.user?.email || "User"
+
+  const locations = [
+    "New York 10001",
+    "Los Angeles 90001",
+    "Chicago 60601",
+    "Houston 77001",
+    "Phoenix 85001",
+    "Philadelphia 19101",
+    "San Antonio 78201",
+    "San Diego 92101",
+    "Dallas 75201",
+    "San Jose 95101",
+  ]
+
+ 
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50)
@@ -89,147 +120,21 @@ export function Header() {
             </Button>
 
             {/* Logo */}
-            <motion.a
-              href="/"
-              className="flex items-center gap-2"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-xl">S</span>
-              </div>
-              <span className="hidden sm:block text-xl font-bold text-foreground">
-                Sirsa<span className="text-primary pl-1">Store</span>
-              </span>
-            </motion.a>
+            <LogoSection/>
 
-            {/* Location Selector */}
-            <button className="hidden lg:flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
-              <MapPin className="h-4 w-4" />
-              <div className="text-left">
-                <p className="text-xs">Deliver to</p>
-                <p className="font-medium text-foreground">New York 10001</p>
-              </div>
-            </button>
+            <LocationDetector/>
 
-            {/* Search Bar */}
-            <div className="flex-1 max-w-2xl relative hidden md:block">
-              <motion.div
-                className={`relative flex items-center rounded-full border-2 transition-all duration-300 ${
-                  searchFocused ? "border-primary shadow-lg shadow-primary/20" : "border-border"
-                }`}
-                animate={{ scale: searchFocused ? 1.02 : 1 }}
-              >
-                <Input
-                  type="text"
-                  placeholder="Search for products, brands and more..."
-                  className="border-0 bg-transparent pl-4 pr-24 py-3 h-12 rounded-full focus-visible:ring-0"
-                  onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setSearchFocused(false)}
-                />
-                <div className="absolute right-2 flex items-center gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/10">
-                    <Mic className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                  <Button size="icon" className="h-8 w-8 rounded-full bg-primary hover:bg-primary/90">
-                    <Search className="h-4 w-4" />
-                  </Button>
-                </div>
-              </motion.div>
+           <SearchBar/>
 
-              {/* Search Suggestions */}
-              <AnimatePresence>
-                {searchFocused && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-0 right-0 mt-2 bg-card rounded-xl shadow-2xl border border-border p-4 z-50"
-                  >
-                    <p className="text-xs text-muted-foreground mb-2">Popular Searches</p>
-                    <div className="flex flex-wrap gap-2">
-                      {["iPhone 15", "Nike Shoes", "Samsung TV", "Headphones", "Laptop"].map((term) => (
-                        <Badge
-                          key={term}
-                          variant="secondary"
-                          className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-                        >
-                          {term}
-                        </Badge>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Right Actions */}
             <div className="flex items-center gap-1 md:gap-2">
-              {/* Notifications */}
-              <Button variant="ghost" size="icon" className="relative hidden md:flex">
-                <Bell className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] rounded-full flex items-center justify-center">
-                  3
-                </span>
-              </Button>
+              <Notification />
+                <Wishlist  />
 
-              {/* Wishlist */}
-              <Button variant="ghost" size="icon" className="relative">
-                <Heart className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center">
-                  5
-                </span>
-              </Button>
-
-              {/* Cart */}
-              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                <Button variant="ghost" size="icon" className="relative" onClick={toggleCart}>
-                  <ShoppingCart className="h-5 w-5" />
-                  {cartItemCount > 0 && (
-                    <motion.span
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center"
-                    >
-                      {cartItemCount}
-                    </motion.span>
-                  )}
-                </Button>
-              </motion.div>
-
-              {/* User Menu */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="hidden md:flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    <div className="text-left hidden lg:block">
-                      <p className="text-xs text-muted-foreground">
-                        {session ? `Hello, ${userName}` : "Hello, Sign in"}
-                      </p>
-                      <p className="text-sm font-medium">Account</p>
-                    </div>
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  {session ? (
-                    <>
-                      <DropdownMenuLabel>{userName}</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem>Account</DropdownMenuItem>
-                      <DropdownMenuItem>Profile</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>Logout</DropdownMenuItem>
-                    </>
-                  ) : (
-                    <DropdownMenuItem onClick={() => signIn()}>Sign in</DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+             <Cart cartItemCount={cartItemCount} />
+              <Account/>
             </div>
           </div>
 
-          {/* Category Navigation */}
           <nav className="hidden md:flex items-center gap-1 pb-2 overflow-x-auto scrollbar-hide">
             <Button
               variant="ghost"

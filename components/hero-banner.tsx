@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -51,10 +52,10 @@ export function HeroBanner() {
         <AnimatePresence mode="wait">
           <motion.div
             key={current}
-            initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.7 }}
+            initial={{ x: 120 }}
+            animate={{ x: 4 }}
+            exit={{ x: -120 }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
             className={`absolute inset-0 bg-gradient-to-r ${banners[current].bg}`}
           >
             <div className="container mx-auto px-4 h-full flex items-center">
@@ -93,10 +94,13 @@ export function HeroBanner() {
                   transition={{ delay: 0.4 }}
                   className="hidden md:block"
                 >
-                  <img
+                  <Image
                     src={banners[current].image || "/placeholder.svg"}
                     alt={banners[current].title}
+                    width={640}
+                    height={480}
                     className="w-full max-w-md mx-auto drop-shadow-2xl animate-float"
+                    priority
                   />
                 </motion.div>
               </div>
