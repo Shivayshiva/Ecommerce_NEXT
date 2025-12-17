@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -13,6 +13,7 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   useEffect(() => {
     if (status === "authenticated" && session) {
@@ -40,6 +41,13 @@ export default function SignUpPage() {
     }
 
     router.push("/signin?registered=1");
+  };
+
+  const handleGoogleSignUp = async () => {
+    setError("");
+    setGoogleLoading(true);
+    await signIn("google", { callbackUrl: "/" });
+    setGoogleLoading(false);
   };
 
   return (
@@ -99,6 +107,22 @@ export default function SignUpPage() {
             {loading ? "Creating account..." : "Sign up"}
           </button>
         </form>
+
+        <div className="mt-6">
+          <div className="flex items-center gap-3 text-xs text-zinc-500">
+            <div className="h-px flex-1 bg-zinc-200" />
+            <span>Or continue with</span>
+            <div className="h-px flex-1 bg-zinc-200" />
+          </div>
+          <button
+            type="button"
+            onClick={handleGoogleSignUp}
+            disabled={googleLoading}
+            className="mt-4 flex w-full bg-red cursor-pointer items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-800 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {googleLoading ? "Redirecting..." : "Sign up with Google"}
+          </button>
+        </div>
 
         <p className="mt-4 text-sm text-zinc-600">
           Already have an account?{" "}

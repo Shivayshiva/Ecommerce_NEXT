@@ -1,3 +1,4 @@
+
 import React from 'react'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
@@ -5,15 +6,29 @@ import { User } from 'lucide-react'
 import { ChevronDown } from 'lucide-react'
 import { signIn, signOut } from 'next-auth/react'
 import { useSession } from 'next-auth/react'
+import Image from 'next/image'
 
 function Account() {
   const { data: session } = useSession()
   const userName = session?.user?.name || session?.user?.email || "User"
+  const userImage = session?.user?.image
+
+  console.log("sessioion__session",session)
   return (
     <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="hidden md:flex items-center gap-2">
-                    <User className="h-5 w-5" />
+                    {userImage ? (
+                      <Image 
+                        src={userImage} 
+                        alt={userName} 
+                        width={20} 
+                        height={20} 
+                        className="h-5 w-5 rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-5 w-5" />
+                    )}
                     <div className="text-left hidden lg:block">
                       <p className="text-xs text-muted-foreground">
                         {session ? `Hello, ${userName}` : "Hello, Sign in"}
@@ -27,6 +42,10 @@ function Account() {
                   {session ? (
                     <>
                       <DropdownMenuLabel>{userName}</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>Orders</DropdownMenuItem>
+                      <DropdownMenuItem>Wishlist</DropdownMenuItem>
+                      
                       <DropdownMenuSeparator />
                       <DropdownMenuItem>Account</DropdownMenuItem>
                       <DropdownMenuItem>Profile</DropdownMenuItem>

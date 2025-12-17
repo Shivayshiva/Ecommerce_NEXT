@@ -48,27 +48,12 @@ import LocationDetector from "@/app/(public)/components/locationDetector"
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [showMegaMenu, setShowMegaMenu] = useState(false)
-  const [searchFocused, setSearchFocused] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [selectedLocation, setSelectedLocation] = useState("New York 10001")
-  const [selectedCategory, setSelectedCategory] = useState("All Categories")
   const { items, toggleCart } = useCartStore()
   const { data: session } = useSession()
 
   const userName = session?.user?.name || session?.user?.email || "User"
 
-  const locations = [
-    "New York 10001",
-    "Los Angeles 90001",
-    "Chicago 60601",
-    "Houston 77001",
-    "Phoenix 85001",
-    "Philadelphia 19101",
-    "San Antonio 78201",
-    "San Diego 92101",
-    "Dallas 75201",
-    "San Jose 95101",
-  ]
 
  
 

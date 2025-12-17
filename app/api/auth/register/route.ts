@@ -20,17 +20,24 @@ export async function POST(request: Request) {
 
     await connectToDatabase();
 
-    const existingUser = await User.findOne({ email });
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
-      return NextResponse.json({ error: "User already exists." }, { status: 409 });
+      const errorMessage =
+        existingUser.provider === "google"
+          ? "User already exists. Please continue with Google."
+          : "User already exists.";
+      return NextResponse.json({ error: errorMessage }, { status: 409 });
     }
 
     const hashedPassword = await hash(password, 10);
 
     await User.create({
       name,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
+      provider: "credentials",
     });
 
     return NextResponse.json({ success: true });

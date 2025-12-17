@@ -13,7 +13,7 @@ export default function PublicLayout({
   return (
     <>
       <Header />
-      <HeroBanner />
+      {/* <HeroBanner /> */}
       {children}
       <Footer />
       <CartSidebar />
