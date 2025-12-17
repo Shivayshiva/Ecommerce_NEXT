@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     images: [
       {
         // url: `${process.env.NEXT_PUBLIC_APP_URL}/api/og`,
-        url: "./public/android-chrome-512x512.png",
+        url: `${process.env.NEXT_PUBLIC_APP_URL}/android-chrome-512x512.png`,
         width: 1200,
         height: 630,
         alt: "Sirsa Ecommerce",
@@ -46,7 +46,8 @@ export const metadata: Metadata = {
     images: [
       {
         // url: `${process.env.NEXT_PUBLIC_APP_URL}/api/og`,
-        url: "./public/android-chrome-512x512.png",
+        url: `${process.env.NEXT_PUBLIC_APP_URL}/android-chrome-512x512.png`,
+        
         width: 1200,
         height: 630,
         alt: "Sirsa Ecommerce",
