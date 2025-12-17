@@ -15,6 +15,7 @@ function SignInContent() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   useEffect(() => {
     if (status === "authenticated" && session) {
@@ -41,6 +42,13 @@ function SignInContent() {
     }
 
     router.push("/");
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError("");
+    setGoogleLoading(true);
+    await signIn("google", { callbackUrl: "/" });
+    setGoogleLoading(false);
   };
 
   return (
@@ -89,11 +97,27 @@ function SignInContent() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-black px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70"
+            className="w-full rounded-lg pointer bg-black px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
+
+        <div className="mt-6">
+          <div className="flex items-center gap-3 text-xs text-zinc-500">
+            <div className="h-px flex-1 bg-zinc-200" />
+            <span>Or continue with</span>
+            <div className="h-px flex-1 bg-zinc-200" />
+          </div>
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={googleLoading}
+            className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-800 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {googleLoading ? "Redirecting..." : "Sign in with Google"}
+          </button>
+        </div>
 
         <p className="mt-4 text-sm text-zinc-600">
           Don&apos;t have an account?{" "}
