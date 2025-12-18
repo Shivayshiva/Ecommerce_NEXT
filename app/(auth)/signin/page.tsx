@@ -11,6 +11,8 @@ function SignInContent() {
   const registered = searchParams.get("registered");
   const { data: session, status } = useSession();
 
+  console.log("_____ppp__", session, status)
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");

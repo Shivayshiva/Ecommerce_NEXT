@@ -3,6 +3,7 @@ import mongoose, { Schema, models, type SchemaTypeOptions } from "mongoose";
 
 export interface IUser {
   _id: mongoose.Types.ObjectId;
+  userType: "admin" | "customer";
   name: string;
   email: string;
   password?: string;
@@ -39,6 +40,7 @@ const UserSchema = new Schema<IUser>(
     image: { type: String },
     googleId: { type: String, unique: true, sparse: true },
     lastLoginAt: { type: Date, default: Date.now },
+    userType: { type: String, enum: ["admin", "customer"], default: "customer" },
   },
   { timestamps: true }
 );

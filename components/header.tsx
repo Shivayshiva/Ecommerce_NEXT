@@ -37,13 +37,13 @@ import {
 } from "@/components/ui/select"
 import { useCartStore } from "@/lib/store"
 import { MegaMenu } from "./mega-menu"
-import SearchBar from "@/app/(public)/components/searchBar"
-import Cart from "@/app/(public)/components/cart"
-import Wishlist from "@/app/(public)/components/wishlist"
-import Notification from "@/app/(public)/components/notification"
-import Account from "@/app/(public)/components/account"
-import LogoSection from "@/app/(public)/components/logoSection"
-import LocationDetector from "@/app/(public)/components/locationDetector"
+import SearchBar from "@/components/publicGroupedComponents/searchBar"
+import Cart from "@/components/publicGroupedComponents/cart"
+import Wishlist from "@/components/publicGroupedComponents/wishlist"
+import Notification from "@/components/publicGroupedComponents/notification"
+import Account from "@/components/publicGroupedComponents/account"
+import LogoSection from "@/components/publicGroupedComponents/logoSection"
+import LocationDetector from "@/components/publicGroupedComponents/locationDetector"
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)

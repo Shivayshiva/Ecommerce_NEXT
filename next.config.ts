@@ -20,6 +20,17 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '*.google.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        // hostname: `ik.imagekit.io${process.env.IMAGEKIT_ENDPOINT_NAME}`, 
+        hostname: `ik.imagekit.io`, 
+
+      }
+
     ],
   },
 };

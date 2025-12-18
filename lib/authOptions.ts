@@ -45,6 +45,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           image: user.image || null,
+          userType: user.userType,
         };
       },
     }),
@@ -108,12 +109,16 @@ export const authOptions: NextAuthOptions = {
       if (!existingUser) return false;
 
       (user as { id?: string }).id = existingUser._id.toString();
+      (user as { userType?: "admin" | "customer" }).userType = existingUser.userType;
       return true;
     },
     async jwt({ token, user }) {
       if (user) {
         token.id = (user as { id?: string }).id ?? token.id;
         token.image = (user as { image?: string | null }).image ?? token.image;
+        (token as { userType?: "admin" | "customer" }).userType =
+          (user as { userType?: "admin" | "customer" }).userType ??
+          (token as { userType?: "admin" | "customer" }).userType;
       }
       // Ensure token contains the database id for OAuth logins on subsequent requests.
       if (!token.id && token.sub) {
@@ -123,13 +128,14 @@ export const authOptions: NextAuthOptions = {
         await connectToDatabase();
         const normalizedEmail = normalizeEmail(token.email);
         const existingUser = normalizedEmail
-          ? await User.findOne({ email: normalizedEmail }).select("_id image")
+          ? await User.findOne({ email: normalizedEmail }).select("_id image userType")
           : null;
         if (existingUser) {
           token.id = existingUser._id.toString();
           if (!token.image) {
             token.image = existingUser.image || null;
           }
+          (token as { userType?: "admin" | "customer" }).userType = existingUser.userType;
         }
       }
       return token;
@@ -141,6 +147,11 @@ export const authOptions: NextAuthOptions = {
         }
         if (token?.image !== undefined) {
           (session.user as { image?: string | null }).image = token.image as string | null;
+        }
+        if ((token as { userType?: "admin" | "customer" }).userType) {
+          (session.user as { userType?: "admin" | "customer" }).userType = (
+            token as { userType?: "admin" | "customer" }
+          ).userType;
         }
       }
       return session;
