@@ -52,7 +52,6 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.AUTH_GOOGLE_ID!,
       clientSecret: process.env.AUTH_GOOGLE_SECRET!,
-      // Ensure we always have the google profile id and avatar handy.
       profile(profile) {
         return {
           id: profile.sub,
@@ -105,39 +104,56 @@ export const authOptions: NextAuthOptions = {
         },
         { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
       );
+      console.log("GHGHGH_GHGHGH_GHGH_GHGHGH", existingUser)
 
       if (!existingUser) return false;
 
+
       (user as { id?: string }).id = existingUser._id.toString();
-      (user as { userType?: "admin" | "customer" }).userType = existingUser.userType;
+      // Propagate a guaranteed userType onto the OAuth user object so downstream
+      // callbacks (jwt/session) receive it. Default to "customer" when missing.
+      (user as { userType?: "admin" | "customer" }).userType =
+        existingUser?.userType ;
+      console.log("DFDFDFDFDFDFDFDF___DFDFDF", user, "-----", existingUser)
       return true;
     },
     async jwt({ token, user }) {
+      console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", token, user)
       if (user) {
         token.id = (user as { id?: string }).id ?? token.id;
         token.image = (user as { image?: string | null }).image ?? token.image;
-        (token as { userType?: "admin" | "customer" }).userType =
-          (user as { userType?: "admin" | "customer" }).userType ??
-          (token as { userType?: "admin" | "customer" }).userType;
+        token.userType = (user as { userType?: "admin" | "customer" }).userType ?? token.userType;
       }
       // Ensure token contains the database id for OAuth logins on subsequent requests.
       if (!token.id && token.sub) {
         token.id = token.sub;
       }
-      if (!token.id && token.email) {
+      
+      // If userType is missing from token, fetch it from database
+      if (!token.userType) {
         await connectToDatabase();
-        const normalizedEmail = normalizeEmail(token.email);
-        const existingUser = normalizedEmail
-          ? await User.findOne({ email: normalizedEmail }).select("_id image userType")
-          : null;
+        let existingUser = null;
+        
+        if (token.id) {
+          existingUser = await User.findById(token.id).select("userType image");
+        } else if (token.email) {
+          const normalizedEmail = normalizeEmail(token.email);
+          existingUser = normalizedEmail
+            ? await User.findOne({ email: normalizedEmail }).select("_id image userType")
+            : null;
+        }
+        
         if (existingUser) {
-          token.id = existingUser._id.toString();
+          if (!token.id) {
+            token.id = existingUser._id.toString();
+          }
           if (!token.image) {
             token.image = existingUser.image || null;
           }
-          (token as { userType?: "admin" | "customer" }).userType = existingUser.userType;
+          token.userType = existingUser.userType;
         }
       }
+      console.log("token_______token_toekn", token)
       return token;
     },
     async session({ session, token }) {

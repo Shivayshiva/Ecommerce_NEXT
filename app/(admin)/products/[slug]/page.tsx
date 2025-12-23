@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { GlobalButton } from "@/components/ui/global-button";
 import {
   Card,
   CardContent,
@@ -138,13 +138,13 @@ export default function AdminProductDetailPage() {
         <p className="text-sm text-muted-foreground">
           {error ?? "Product not found."}
         </p>
-        <Button
+        <GlobalButton
           className="mt-4"
           variant="outline"
           onClick={() => router.push("/(admin)/products")}
         >
           Back to products
-        </Button>
+        </GlobalButton>
       </div>
     );
   }
@@ -157,7 +157,7 @@ export default function AdminProductDetailPage() {
   const mainImage = images[safeSelectedIndex];
 
   return (
-    <div className="container mx-auto max-w-6xl space-y-6 py-8">
+    <div className="container mx-auto max-w-6xl space-y-6 ">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="space-y-1">
@@ -215,21 +215,21 @@ export default function AdminProductDetailPage() {
           <Separator orientation="vertical" className="mx-1 hidden h-5 sm:block" />
           <div className="flex flex-wrap items-center gap-2">
             <Link href={`/products/${product._id}/edit`}>
-              <Button variant="outline" size="sm">
+              <GlobalButton variant="outline" size="sm">
                 Edit
-              </Button>
+              </GlobalButton>
             </Link>
             <Link href={`/product/${product.slug}`}>
-              <Button variant="outline" size="sm">
+              <GlobalButton variant="outline" size="sm">
                 View customer page
-              </Button>
+              </GlobalButton>
             </Link>
-            <Button variant="outline" size="sm">
+            <GlobalButton variant="outline" size="sm">
               Duplicate
-            </Button>
-            <Button variant="destructive" size="sm">
+            </GlobalButton>
+            <GlobalButton variant="destructive" size="sm">
               Delete
-            </Button>
+            </GlobalButton>
           </div>
         </div>
       </div>

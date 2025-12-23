@@ -6,10 +6,6 @@ export const productSchema = z
       .string()
       .min(1, "Product name is required")
       .min(3, "Product name must be at least 3 characters"),
-    slug: z
-      .string()
-      .min(1, "Slug is required")
-      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be lowercase letters, numbers, and hyphens only"),
     sku: z.string().min(1, "SKU is required"),
     brand: z.string().min(1, "Brand is required"),
     category: z.string().min(1, "Category is required"),

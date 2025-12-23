@@ -61,7 +61,7 @@ export interface IProduct {
 const ProductSchema = new Schema<IProduct>(
   {
     name: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    slug: { type: String, required: true, unique: true, lowercase: true, trim: true, index:true },
     sku: { type: String, required: true, unique: true, trim: true },
     brand: { type: String, required: true, trim: true },
     category: { type: String, required: true, trim: true },

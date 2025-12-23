@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
+import { GlobalButton } from "@/components/ui/global-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
@@ -65,7 +65,6 @@ export default function CreateProductPage() {
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: "",
-      slug: "",
       sku: "",
       brand: "",
       category: "",
@@ -87,20 +86,6 @@ export default function CreateProductPage() {
       sponsored: false,
     },
   });
-
-  // Auto-generate slug from name
-  const handleNameChange = (value: string) => {
-    form.setValue("name", value);
-    if (!form.formState.touchedFields.slug) {
-      const slug = value
-        .toLowerCase()
-        .trim()
-        .replace(/[^\w\s-]/g, "")
-        .replace(/[\s_-]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-      form.setValue("slug", slug);
-    }
-  };
 
   // Auto-calculate discount from price and MRP
   const handlePriceChange = (field: "price" | "mrp", value: number) => {
@@ -141,7 +126,7 @@ export default function CreateProductPage() {
     }
   };
 
-  return (
+  return (  
     <div className="container mx-auto max-w-5xl space-y-6 py-8">
       <div className="flex items-center justify-between">
         <div>
@@ -151,7 +136,7 @@ export default function CreateProductPage() {
           </p>
         </div>
         <Link href="/(admin)/products">
-          <Button variant="outline">Cancel</Button>
+          <GlobalButton variant="outline" title="Cancel" />
         </Link>
       </div>
 
@@ -174,7 +159,6 @@ export default function CreateProductPage() {
                       <Input
                         placeholder="e.g., Nike Air Max 270"
                         {...field}
-                        onChange={(e) => handleNameChange(e.target.value)}
                       />
                     </FormControl>
                     <FormDescription>
@@ -186,23 +170,6 @@ export default function CreateProductPage() {
               />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="slug"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Slug *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="nike-air-max-270" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        URL-friendly version of the name
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 <FormField
                   control={form.control}
                   name="sku"
@@ -676,13 +643,13 @@ export default function CreateProductPage() {
           {/* Form Actions */}
           <div className="flex items-center justify-end gap-4 pt-4">
             <Link href="/(admin)/products">
-              <Button type="button" variant="outline">
-                Cancel
-              </Button>
+              <GlobalButton type="button" variant="outline" title="Cancel" />
             </Link>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Product"}
-            </Button>
+            <GlobalButton
+              type="submit"
+              disabled={isSubmitting}
+              title={isSubmitting ? "Creating..." : "Create Product"}
+            />
           </div>
         </form>
       </Form>

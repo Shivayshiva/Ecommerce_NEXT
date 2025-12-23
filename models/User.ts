@@ -13,6 +13,10 @@ export interface IUser {
   lastLoginAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+  wishlist: Array<{
+    productId: mongoose.Types.ObjectId;
+    addedAt: Date;
+  }>;
 }
 
 const passwordRequired: NonNullable<SchemaTypeOptions<string>["required"]> = function (
@@ -41,6 +45,18 @@ const UserSchema = new Schema<IUser>(
     googleId: { type: String, unique: true, sparse: true },
     lastLoginAt: { type: Date, default: Date.now },
     userType: { type: String, enum: ["admin", "customer"], default: "customer" },
+    wishlist: [
+      {
+        productId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+        },
+        addedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -1,23 +1,13 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Suspense, useEffect, useState, useTransition } from "react";
-import { StarIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { GlobalButton } from "@/components/ui/global-button";
+import { GlobalTitle } from "@/components/ui/global-title";
 import { Input } from "@/components/ui/input";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -33,7 +23,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+import AdminPagination from "@/components/admin-pagination";
+import QuickActions from "@/components/admin-quick-actions";
+import BulkActionsBar from "@/components/admin-bulk-actions-bar";
+import { Card, CardContent } from "@/components/ui/card";
+import AdminProductCard from "@/components/admin-product-card";
 
 type ProductStatus = "active" | "draft" | "inactive";
 
@@ -165,8 +159,8 @@ function mapApiProductToProduct(apiProduct: ApiProduct): Product {
     views: 0,
     addToCart: 0,
     orders: 0,
-    createdAt: new Date(apiProduct.createdAt).toISOString(),
-    updatedAt: new Date(apiProduct.updatedAt).toISOString(),
+    createdAt: apiProduct?.createdAt ? new Date(apiProduct?.createdAt)?.toISOString() : new Date().toISOString(),
+    updatedAt: apiProduct?.updatedAt ? new Date(apiProduct?.updatedAt)?.toISOString() : new Date().toISOString(),
     createdBy: "System",
     updatedBy: "System",
   };
@@ -262,41 +256,12 @@ function buildQuery(next: Partial<ParsedParams>, current: ParsedParams) {
   return search ? `?${search}` : "";
 }
 
-function SearchInput({ defaultValue, params }: { defaultValue: string; params: ParsedParams }) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        const q = (formData.get("q") as string) || "";
-        startTransition(() => {
-          const newParams = buildQuery({ q, page: 1 }, params);
-          router.push(`/(admin)/products${newParams}`);
-        });
-      }}
-      className="inline-flex"
-    >
-      <Input
-        placeholder="Search by name, SKU, brand…"
-        defaultValue={defaultValue}
-        className="h-9 w-48 md:w-64"
-        name="q"
-        key={defaultValue}
-        disabled={isPending}
-      />
-    </form>
-  );
-}
-
 function ProductsPageContent() {
   const searchParams = useSearchParams();
   const params = parseSearchParams(Object.fromEntries(searchParams.entries()));
 
   const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -311,8 +276,12 @@ function ProductsPageContent() {
         }
 
         const data = await response.json();
+        
         const apiProducts: ApiProduct[] = data.products ?? [];
-        const mapped = apiProducts.map(mapApiProductToProduct);
+        console.log("API_Response_Response",apiProducts);
+
+        const mapped = apiProducts?.map(mapApiProductToProduct);
+
         setAllProducts(mapped);
       } catch (err) {
         console.error("Error fetching products:", err);
@@ -333,203 +302,44 @@ function ProductsPageContent() {
   const startIndex = (currentPage - 1) * params.pageSize;
   const paginated = filtered.slice(startIndex, startIndex + params.pageSize);
 
-  const brands = Array.from(new Set(allProducts.map((p: Product) => p.brand))).sort();
-  const categories = Array.from(new Set(allProducts.map((p: Product) => p.category))).sort();
+  const brands = Array.from(new Set(allProducts.map((p: Product) => p.brand))).sort() as string[];
+  const categories = Array.from(new Set(allProducts.map((p: Product) => p.category))).sort() as string[];
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-semibold text-foreground">
-            Products catalogue
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            View, filter, and manage all onboarded products.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" size="sm">
-            Export CSV
-          </Button>
-          <Button variant="outline" size="sm">
-            Import CSV
-          </Button>
-          <Link href="/products/create">
-            <Button size="sm">+ Add product</Button>
+      <GlobalTitle
+        title="Products catalogue"
+        description="View, filter, and manage all onboarded products."
+      >
+        <>
+          <GlobalButton title="Export CSV" variant="outline" size="sm" />
+          <GlobalButton title="Import CSV" variant="outline" size="sm" />
+          <Link href="/products/add/category">
+            <GlobalButton title="+ Add product" size="sm" />
           </Link>
-        </div>
-      </div>
+        </>
+      </GlobalTitle>
 
       <Card>
-        <CardHeader className="gap-4 border-b border-border">
-          <CardTitle className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
-              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                {total} products
-              </span>
-              <span className="text-xs text-muted-foreground">
-                Server-side style pagination • No infinite scroll
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <SearchInput defaultValue={params.q} params={params} />
-              <ProductsSortSelect defaultValue={params.sort} params={params} />
-              <PageSizeSelect defaultValue={params.pageSize} params={params} />
-            </div>
-          </CardTitle>
-        </CardHeader>
-
         <CardContent className="space-y-4 pt-4">
-          {isLoading && (
-            <div className="text-sm text-muted-foreground">
-              Loading products from database...
-            </div>
-          )}
-
-          {error && (
-            <div className="text-sm text-destructive">
-              {error}
-            </div>
-          )}
-
           <FiltersBar
             categories={categories}
             brands={brands}
             params={params}
           />
-
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <span className="font-medium">Bulk actions</span>
-              <span className="text-muted-foreground">
-                Select products below to enable
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button variant="outline" size="sm">
-                Activate
-              </Button>
-              <Button variant="outline" size="sm">
-                Deactivate
-              </Button>
-              <Button variant="outline" size="sm">
-                Apply discount
-              </Button>
-              <Button variant="outline" size="sm">
-                Update stock
-              </Button>
-              <Button variant="outline" size="sm">
-                Change category
-              </Button>
-              <Button variant="outline" size="sm">
-                Mark featured
-              </Button>
-              <Button variant="destructive" size="sm">
-                Delete
-              </Button>
-            </div>
-          </div>
-
+          <BulkActionsBar />
           <ProductsGrid products={paginated} />
 
-          <div className="flex flex-col gap-3 border-t border-border pt-4 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between">
-            <span>
-              Showing{" "}
-              <span className="font-medium text-foreground">
-                {total === 0 ? 0 : startIndex + 1}-
-                {Math.min(startIndex + params.pageSize, total)}
-              </span>{" "}
-              of <span className="font-medium text-foreground">{total}</span>{" "}
-              products
-            </span>
-            <ProductsPagination
-              totalPages={totalPages}
-              currentPage={currentPage}
-              params={params}
-            />
-          </div>
+          <AdminPagination
+            total={total}
+            startIndex={startIndex}
+            params={params}
+            totalPages={totalPages}
+            currentPage={currentPage}
+          />
         </CardContent>
       </Card>
     </div>
-  );
-}
-
-function ProductsPagination({
-  totalPages,
-  currentPage,
-  params,
-}: {
-  totalPages: number;
-  currentPage: number;
-  params: ParsedParams;
-}) {
-  if (totalPages <= 1) return null;
-
-  const pages: number[] = [];
-  for (let i = 1; i <= totalPages; i++) {
-    if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
-      pages.push(i);
-    }
-  }
-
-  return (
-    <Pagination className="w-full md:w-auto">
-      <PaginationContent>
-        <PaginationItem>
-          <PaginationPrevious
-            href={buildQuery(
-              { page: Math.max(1, currentPage - 1) },
-              params
-            )}
-            aria-disabled={currentPage === 1}
-          />
-        </PaginationItem>
-        {pages.map((page) => (
-          <PaginationItem key={page}>
-            <PaginationLink
-              href={buildQuery({ page }, params)}
-              isActive={page === currentPage}
-            >
-              {page}
-            </PaginationLink>
-          </PaginationItem>
-        ))}
-        <PaginationItem>
-          <PaginationNext
-            href={buildQuery(
-              { page: Math.min(totalPages, currentPage + 1) },
-              params
-            )}
-            aria-disabled={currentPage === totalPages}
-          />
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
-  );
-}
-
-function PageSizeSelect({ defaultValue, params }: { defaultValue: PageSize; params: ParsedParams }) {
-  const router = useRouter();
-  
-  return (
-    <Select
-      defaultValue={String(defaultValue)}
-      onValueChange={(value) => {
-        const newParams = buildQuery({ pageSize: Number(value) as PageSize, page: 1 }, params);
-        router.push(`/(admin)/products${newParams}`);
-      }}
-    >
-      <SelectTrigger size="sm">
-        <SelectValue placeholder="Page size" />
-      </SelectTrigger>
-      <SelectContent>
-        {PAGE_SIZE_OPTIONS.map((size) => (
-          <SelectItem key={size} value={String(size)}>
-            {size} / page
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
   );
 }
 
@@ -541,7 +351,7 @@ function ProductsSortSelect({ defaultValue, params }: { defaultValue: string; pa
       defaultValue={defaultValue}
       onValueChange={(value) => {
         const newParams = buildQuery({ sort: value, page: 1 }, params);
-        router.push(`/(admin)/products${newParams}`);
+        router.push(`/products${newParams}`);
       }}
     >
       <SelectTrigger size="sm" className="w-44">
@@ -582,7 +392,7 @@ function FiltersBar({
         defaultValue={params.category}
         onValueChange={(value) => {
           const newParams = buildQuery({ category: value, page: 1 }, params);
-          router.push(`/(admin)/products${newParams}`);
+          router.push(`/products${newParams}`);
         }}
       >
         <SelectTrigger size="sm" className="w-40">
@@ -602,7 +412,7 @@ function FiltersBar({
         defaultValue={params.brand}
         onValueChange={(value) => {
           const newParams = buildQuery({ brand: value, page: 1 }, params);
-          router.push(`/(admin)/products${newParams}`);
+          router.push(`/products${newParams}`);
         }}
       >
         <SelectTrigger size="sm" className="w-40">
@@ -622,7 +432,7 @@ function FiltersBar({
         defaultValue={params.status}
         onValueChange={(value) => {
           const newParams = buildQuery({ status: value, page: 1 }, params);
-          router.push(`/(admin)/products${newParams}`);
+          router.push(`/products${newParams}`);
         }}
       >
         <SelectTrigger size="sm" className="w-36">
@@ -640,7 +450,7 @@ function FiltersBar({
         defaultValue={params.stockStatus}
         onValueChange={(value) => {
           const newParams = buildQuery({ stockStatus: value, page: 1 }, params);
-          router.push(`/(admin)/products${newParams}`);
+          router.push(`/products${newParams}`);
         }}
       >
         <SelectTrigger size="sm" className="w-40">
@@ -656,13 +466,12 @@ function FiltersBar({
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
+          <GlobalButton
             variant="ghost"
             size="sm"
             className="text-xs text-muted-foreground"
-          >
-            More filters
-          </Button>
+            title="More filters"
+          />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-64">
           <DropdownMenuLabel>Advanced filters</DropdownMenuLabel>
@@ -700,13 +509,12 @@ function FiltersBar({
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
+          <GlobalButton
             variant="ghost"
             size="sm"
             className="ml-auto text-xs text-muted-foreground"
-          >
-            Columns
-          </Button>
+            title="Columns"
+          />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-52">
           <DropdownMenuLabel>Column visibility</DropdownMenuLabel>
@@ -775,31 +583,6 @@ function stockBadge(product: Product) {
   );
 }
 
-// Reserved for future use when flag chips are needed in the grid view.
-// function flagBadges(product: Product) {
-//   const flags: string[] = [];
-//   if (product.featured) flags.push("⭐ Featured");
-//   if (product.bestseller) flags.push("🔥 Bestseller");
-//   if (product.isNew) flags.push("🆕 New");
-//   if (product.sponsored) flags.push("Sponsored");
-// 
-//   if (!flags.length) return null;
-// 
-//   return (
-//     <div className="flex flex-wrap gap-1 text-[11px] text-muted-foreground">
-//       {flags.map((f) => (
-//         <Badge
-//           key={f}
-//           variant="outline"
-//           className="border-border/60 bg-muted/70"
-//         >
-//           {f}
-//         </Badge>
-//       ))}
-//     </div>
-//   );
-// }
-
 function ProductsGrid({ products }: { products: Product[] }) {
   const hasProducts = products.length > 0;
 
@@ -816,152 +599,18 @@ function ProductsGrid({ products }: { products: Product[] }) {
     );
   }
 
+  console.log("Product_Product_Product", products);
+
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ">
       {products.map((product) => (
-        <div
-          key={product.id}
-          className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
-        >
-          <div className="relative aspect-3/4 w-full overflow-hidden bg-muted">
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              sizes="(min-width: 1280px) 260px, (min-width: 1024px) 220px, (min-width: 640px) 50vw, 100vw"
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-
-            <div className="absolute left-2 top-2 flex flex-col gap-1">
-              {product.sponsored && (
-                <Badge className="bg-foreground/90 text-background text-[10px] px-2">
-                  AD
-                </Badge>
-              )}
-              {product.isNew && (
-                <Badge className="bg-accent text-accent-foreground text-[10px] px-2">
-                  NEW
-                </Badge>
-              )}
-              {product.discountPercent > 0 && (
-                <Badge className="bg-destructive text-destructive-foreground text-[10px] px-2">
-                  {product.discountPercent}% OFF
-                </Badge>
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-1 flex-col gap-2 p-3">
-            <div className="space-y-1">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                {product.brand}
-              </p>
-              <Link
-                href={`/products/${product.slug}`}
-                className="line-clamp-2 text-sm font-medium text-foreground transition-colors group-hover:text-primary"
-              >
-                {product.name}
-              </Link>
-              <p className="line-clamp-1 text-xs text-muted-foreground">
-                {product.category}
-                {product.subcategory ? ` • ${product.subcategory}` : ""}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 text-sm">
-              <span className="font-semibold text-foreground">
-                ₹ {product.price.toFixed(2)}
-              </span>
-              <span className="text-xs text-muted-foreground line-through">
-                ₹ {product.mrp.toFixed(2)}
-              </span>
-              <span className="text-[11px] font-medium text-emerald-400">
-                ({product.discountPercent}% OFF)
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between text-xs">
-              <div className="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-1.5 py-0.5 text-[11px] text-emerald-300">
-                <span className="font-semibold">
-                  {product.rating.toFixed(1)}
-                </span>
-                <StarIcon className="h-3 w-3 fill-current" />
-                <span className="text-[10px] text-muted-foreground">
-                  ({product.ratingCount})
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                {stockBadge(product)}
-                <span>{product.stock} in stock</span>
-              </div>
-            </div>
-
-            <div className="mt-1 flex items-center justify-between text-[11px] text-muted-foreground">
-              <span>
-                Views: <span className="font-medium">{product.views}</span>
-              </span>
-              <span>
-                Orders: <span className="font-medium">{product.orders}</span>
-              </span>
-            </div>
-
-            <div className="mt-1 flex items-center justify-between text-[11px] text-muted-foreground">
-              <span>
-                Created:{" "}
-                {new Date(product.createdAt).toLocaleDateString()}
-              </span>
-            </div>
-
-            <div className="mt-2 flex items-center justify-between">
-              <div className="flex flex-wrap gap-1">
-                {statusBadge(product.status)}
-              </div>
-              <QuickActions product={product} />
-            </div>
-          </div>
-        </div>
+        <AdminProductCard key={product.id} product={product} actions={<QuickActions product={product} />} />
       ))}
     </div>
   );
 }
 
-function QuickActions({ product }: { product: Product }) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">
-          Actions
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuLabel className="text-xs">
-          {product.name}
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href={`/products/${product.id}/edit`}>✏️ Edit</Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href={`/product/${product.slug}`}>👁 Preview</Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem>📋 Duplicate</DropdownMenuItem>
-        <DropdownMenuItem>📊 View analytics</DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-rose-400" asChild>
-          <button
-            type="button"
-            className={cn(
-              "w-full cursor-pointer text-left text-rose-400",
-              "hover:text-rose-300"
-            )}
-          >
-            🗑 Delete
-          </button>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
+// const [isLoading, setIsLoading] = useState(false);
+// const [error, setError] = useState<string | null>(null);
 
 

@@ -1,11 +1,13 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Heart, Eye, ShoppingCart, Star } from "lucide-react"
+import { Heart, Eye, ShoppingCart, Star, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { useCartStore, useQuickViewStore, useWishlistStore } from "@/lib/store"
+import { useCartStore, useQuickViewStore } from "@/lib/store"
 import type { Product } from "@/lib/data"
+import { useState, useEffect } from "react"
+import { useToast } from "@/hooks/use-toast"
 
 interface ProductCardProps {
   product: Product
@@ -16,10 +18,114 @@ interface ProductCardProps {
 export function ProductCard({ product, index = 0, isFlashDeal }: ProductCardProps) {
   const { addItem } = useCartStore()
   const { openQuickView } = useQuickViewStore()
-  const { toggleWishlist, isInWishlist } = useWishlistStore()
+  const { toast } = useToast()
 
-  const inWishlist = isInWishlist(product.id)
+  const [isInWishlist, setIsInWishlist] = useState(false)
+  const [wishlistLoading, setWishlistLoading] = useState(false)
+  const [isAddedToCart, setIsAddedToCart] = useState(false)
+
   const discount = Math.round((1 - product.price / product.originalPrice) * 100)
+
+  // Fetch initial wishlist status
+  useEffect(() => {
+    const fetchWishlistStatus = async () => {
+      try {
+        const response = await fetch("/api/users/wishlist")
+        const data = await response.json()
+
+        if (data.success) {
+          const productId = (product as any)._id || product.id.toString()
+          const inWishlist = data.wishlist.some((item: any) => 
+            item.productId.toString() === productId
+          )
+          setIsInWishlist(inWishlist)
+        }
+      } catch (error) {
+        console.error("Failed to fetch wishlist status:", error)
+      }
+    }
+
+    fetchWishlistStatus()
+  }, [product])
+
+  const handleAddToCart = () => {
+    addItem(product)
+    setIsAddedToCart(true)
+  }
+
+  // Check initial wishlist status
+  useEffect(() => {
+    const checkWishlistStatus = async () => {
+      try {
+        const response = await fetch("/api/users/wishlist")
+        const data = await response.json()
+
+        console.log("Wishlist_wishlist", data)
+
+        if (data.success) {
+          const productId = (product as any)._id || product.id.toString()
+          const inWishlist = data.wishlist.some((item: any) => item.productId === productId)
+          setIsInWishlist(inWishlist)
+        }
+      } catch (error) {
+        console.error("Failed to fetch wishlist status:", error)
+      }
+    }
+
+    checkWishlistStatus()
+  }, [product.id, (product as any)._id])
+
+  const handleWishlistToggle = async () => {
+    if (wishlistLoading) return
+
+    setWishlistLoading(true)
+
+    try {
+      const action = isInWishlist ? "remove" : "add"
+      const productId = (product as any)._id || product.id.toString()
+
+      console.log("Sending wishlist request:", { productId, action })
+
+      const response = await fetch("/api/users/wishlist", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId,
+          action,
+        }),
+      })
+
+      const data = await response.json()
+      console.log("Wishlist response:", data)
+
+      if (data.success) {
+        setIsInWishlist(!isInWishlist)
+        toast({
+          title: data.message,
+          description: action === "add"
+            ? "Product added to your wishlist"
+            : "Product removed from your wishlist",
+        })
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to update wishlist",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Wishlist toggle error:", error)
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setWishlistLoading(false)
+    }
+  }
 
   return (
     <motion.div
@@ -43,11 +149,14 @@ export function ProductCard({ product, index = 0, isFlashDeal }: ProductCardProp
       {/* Wishlist Button */}
       <motion.button
         whileTap={{ scale: 0.9 }}
-        onClick={() => toggleWishlist(product.id)}
-        className="absolute top-2 right-2 z-10 w-8 h-8 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm hover:bg-card transition-colors"
+        onClick={handleWishlistToggle}
+        disabled={wishlistLoading}
+        className="absolute top-2 right-2 z-10 w-8 h-8 bg-card/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm hover:bg-card transition-colors disabled:opacity-50"
       >
         <Heart
-          className={`h-4 w-4 transition-colors ${inWishlist ? "fill-destructive text-destructive" : "text-muted-foreground"}`}
+          className={`h-4 w-4 transition-colors ${
+            isInWishlist ? "fill-destructive text-destructive" : "text-muted-foreground"
+          } ${wishlistLoading ? "animate-pulse" : ""}`}
         />
       </motion.button>
 
@@ -109,6 +218,37 @@ export function ProductCard({ product, index = 0, isFlashDeal }: ProductCardProp
             <span className="text-sm text-muted-foreground line-through">${product.originalPrice}</span>
           )}
         </div>
+
+        {/* Add to Cart Button */}
+        <motion.div className="mt-3">
+          <Button
+            onClick={handleAddToCart}
+            disabled={isAddedToCart}
+            className="w-full h-9 text-sm font-medium transition-all duration-200 disabled:opacity-100"
+            variant={isAddedToCart ? "secondary" : "default"}
+          >
+            <motion.div
+              className="flex items-center gap-2"
+              initial={false}
+              animate={{
+                scale: isAddedToCart ? 1.05 : 1,
+              }}
+              transition={{ duration: 0.2 }}
+            >
+              {isAddedToCart ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  <span>Added to Cart</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="h-4 w-4" />
+                  <span>Add to Cart</span>
+                </>
+              )}
+            </motion.div>
+          </Button>
+        </motion.div>
 
         {/* Stock indicator */}
         {product.stock < 10 && <p className="text-xs text-destructive mt-1">Only {product.stock} left!</p>}

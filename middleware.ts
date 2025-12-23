@@ -1,5 +1,6 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import type { JWT } from "next-auth/jwt";
 
 /**
  * Global auth/authorization middleware.
@@ -9,12 +10,14 @@ import { NextResponse } from "next/server";
  */
 export default withAuth(
   function middleware(req) {
-    const token = req.nextauth.token as { userType?: string } | null;
+    const token = req.nextauth.token as JWT | null;
+    console.log('TTTTTT___TTTTTTT', token)
+    console.log('userType_userType', token?.userType)
     const { pathname } = req.nextUrl;
 
     const isAdminRoute = pathname.startsWith("/admin");
 
-    console.log('SSSSSSS_SSSSS', isAdminRoute, token)
+    console.log('SSSSSSS_SSSSS', pathname)
 
     // If this is an admin route, ensure the user is an admin.
     if (isAdminRoute) {
